@@ -28,6 +28,7 @@ def transition_func(grid, neighbourstates, neighbourcounts):
     survive = ((live_neighbours == 2) | (live_neighbours == 3)) & (grid == 1)
     # Set all cells to 0 (dead)
     grid[:, :] = 0
+            
     # Set cells to 1 where either cell is born or survives
     grid[birth | survive] = 1
     return grid
@@ -39,7 +40,7 @@ def setup(args):
     # ---THE CA MUST BE RELOADED IN THE GUI IF ANY OF THE BELOW ARE CHANGED---
     config.title = "Forest Fire simulation"
     config.dimensions = 2
-    config.states = (0, 1, 2, 3, 4, 5, 6)
+    config.states = (0, 1, 2, 3, 4, 5, 6) #unburnt, burning, burnt out, chaparral, lake, dense forest, canyon
     # ------------------------------------------------------------------------
 
     # ---- Override the defaults below (these may be changed at anytime) ----
@@ -47,6 +48,20 @@ def setup(args):
     config.state_colors = [(0,0,0),(0.1,0.1,0.1),(0.2,0.2,0.2),(0.3,0.3,0.3),(0.4,0.4,0.4),(0.5,0.5,0.5),(0.6,0.6,0.6)]
     # config.num_generations = 150
     # config.grid_dims = (200,200)
+    grid = np.zeros((200,200))
+    grid[:, :] = 3 # most common is chaparral
+    for y in range(200):
+        for x in range(200):
+            if y >= 20 & y < 160 & x >= 120 & x < 130:
+                grid[y,x] = 6 # canyon
+            elif y >= 70 & y < 80 & x >= 20 & x < 100:
+                grid[y,x] = 4 # water from 30-32.5km on y and 5-25km on x
+            elif y >= 80 & y < 140 & x < 100:
+                grid[y,x] = 5 # forest block from 15-30km on y and 0-25km on x
+            elif y >= 20 & y < 70 & x >= 60 & x < 100:
+                grid[y,x] = 5 # forest block from 32.5-45km on y and 15-25km on x
+    grid [2,3] = 0
+    config.set_initial_grid(grid)
 
     # ----------------------------------------------------------------------
 
