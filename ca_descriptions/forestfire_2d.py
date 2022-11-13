@@ -44,7 +44,7 @@ def setup(args):
 
     # ---- Override the defaults below (these may be changed at anytime) ----
 
-     config.state_colors = [(0,0,0),(1,1,1),(0.5,0.5,0.5)]
+    config.state_colors = [(0,0,0),(1,1,1),(0.5,0.5,0.5)]
     # config.num_generations = 150
     # config.grid_dims = (200,200)
 
