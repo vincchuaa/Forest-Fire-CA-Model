@@ -17,21 +17,55 @@ import capyle.utils as utils
 import numpy as np
 
 
-def transition_func(grid, neighbourstates, neighbourcounts):
+def transition_func(grid, burnTimers, neighbourstates, neighbourcounts):
+    #Canyon catches fire from 1 neighbour, burns for short time
+    #Chaparral catches fire from 2 neighbour, burns for medium time
+    #Forest catches fire from 3 neighbour, burns for long time
+
+    #Neighbour states returns curretn state of the adjacent states
+    #Neighbour counts returns boolean array, counting each type of adjacency
+    chaparral, burning, burntOut, town, lake, denseForest, canyon = neighbourcounts
+    #Set new burning areas (1 time = 12 hours)
+    #Can burns for "several hours" = 1 time
+    #Chap burns for "several days" = 8 time
+    #Forest burns for "one month" = 60 time
+
+    burningCan = (grid == 6) & (burning >= 1)
+    burningChap = (grid == 0) & (burning >= 2)
+    burningFor = (grid == 5) & (burning >= 3)
+
+    burnTimers[burningCan] = 2
+    burnTimers[burningChap] = 9
+    burnTimers[burningFor] = 61
+
+    grid[burningCan | burningChap | burningFor] = 1
+    fireStop = burnTimers == 1
+    grid[fireStop] = 2
+
+    onFire = (burnTimers > 0)
+    burnTimers[onFire] = burnTimers[onFire] - 1
+    #print(burnTimers)
+
+    
+
+    #print(burningCan)
+    #print(burningChap)
+    #print(burningFor)
+
     # dead = state == 0, live = state == 1
     # unpack state counts for state 0 and state 1
-    dead_neighbours, live_neighbours = neighbourcounts
+    #dead_neighbours, live_neighbours = neighbourcounts
     # create boolean arrays for the birth & survival rules
     # if 3 live neighbours and is dead -> cell born
-    birth = (live_neighbours == 3) & (grid == 0)
+    #birth = (live_neighbours == 3) & (grid == 0)
     # if 2 or 3 live neighbours and is alive -> survives
-    survive = ((live_neighbours == 2) | (live_neighbours == 3)) & (grid == 1)
+    #survive = ((live_neighbours == 2) | (live_neighbours == 3)) & (grid == 1)
     # Set all cells to 0 (dead)
-    grid[:, :] = 0
-            
+    #grid[:, :] = 0        
     # Set cells to 1 where either cell is born or survives
-    grid[birth | survive] = 1
-    return grid
+    #grid[birth | survive] = 1
+    
+    return grid, burnTimers
 
 
 def setup(args):
@@ -72,9 +106,15 @@ def setup(args):
       for right in range(75,85,1):
         grid[down,right] = 3
     #Add power plant fire
-    grid[0,0] = 1
+    #grid[0,0] = 1
+    #grid[0,1] = 1
+    #grid[1,0] = 1
+    #grid[1,1] = 1
     #Add incinerator fire
-    #grid[0,199] = 1
+    grid[0,199] = 1
+    grid[1,199] = 1
+    grid[0,198] = 1
+    grid[1,198] = 1
 
 
     #for y in range(200):

@@ -36,6 +36,10 @@ class Grid2D(Grid):
         # if at t = 0 grid has been supplied, set the states
         if ca_config.initial_grid is not None:
             self.set_grid(ca_config.initial_grid)
+            #Checks for burning areas, sets to 60
+            onFire = (self.grid == 1)
+            self.burnTimers = np.zeros((numrows,numcols))
+            self.burnTimers[onFire] = 60
 
         # set neighbourhood
         self.set_neighbourhood(ca_config)
@@ -164,9 +168,9 @@ class Grid2D(Grid):
         # passing in the states and counts to allow complex rules
         # if the user supplied any addition arguments, pass them here
         if self.additional_args is None:
-            self.grid = self.transition_func(self.grid, ns, nc)
+            self.grid, self.burnTimers = self.transition_func(self.grid, self.burnTimers, ns, nc)
         else:
-            self.grid = self.transition_func(self.grid, ns, nc,
+            self.grid, self.burnTimers = self.transition_func(self.grid, self.burnTimers, ns, nc,
                                              *self.additional_args)
         # refresh wrapping border
         self.refresh_wrap()

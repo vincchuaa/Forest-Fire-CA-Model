@@ -19,7 +19,7 @@ class CAConfig(object):
         self.nhood_arr = None
         self.initial_grid = None
         # default wrapping behaviour is True
-        self.wrap = True
+        self.wrap = False
         self.default_paths()
 
     def fill_in_defaults(self):
