@@ -71,9 +71,10 @@ def setup(args):
     for down in range(175,185,1):
       for right in range(75,85,1):
         grid[down,right] = 3
-    #Add initial fire spots
+    #Add power plant fire
     grid[0,0] = 1
-    grid[0,199] = 1
+    #Add incinerator fire
+    #grid[0,199] = 1
 
 
     #for y in range(200):
