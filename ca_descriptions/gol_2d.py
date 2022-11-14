@@ -30,9 +30,11 @@ def transition_func(grid, burnTimers, neighbourstates, neighbourcounts):
     #Chap burns for "several days" = 8 time
     #Forest burns for "one month" = 60 time
 
+    NW, N, NE, W, E, SW, S, SE = neighbourstates
+
     burningCan = (grid == 6) & (burning >= 1)
-    burningChap = (grid == 0) & (burning >= 2)
-    burningFor = (grid == 5) & (burning >= 3)
+    burningChap = (grid == 0) & (burning >= 2) | (grid == 0) & (N == 1)
+    burningFor = (grid == 5) & (burning >= 3) | (grid == 5) & (N == 1) # wind maybe???
 
     burnTimers[burningCan] = 2
     burnTimers[burningChap] = 9
