@@ -3,7 +3,7 @@ from capyle.ca import Grid, Neighbourhood
 from capyle.utils import clip_numeric
 
 
-class Grid2D(Grid):
+class Grid2D2(Grid):
 
     def __init__(self, ca_config, transition_func):
         # create superclass
@@ -19,7 +19,7 @@ class Grid2D(Grid):
         self.ca_config = ca_config
 
         # wrap size is 1 col & row all the way round the grid
-        wrapsize = 1
+        wrapsize = 2
         # wrap size doubled for the row/colum on each side of the grid
         # ie. a wrap size of 1 requires 2 extra rows and 2 extra columns
         self.wrapping_grid = np.empty((numrows + wrapsize*2,
@@ -118,23 +118,54 @@ class Grid2D(Grid):
         else:
             sys.exit("Invalid wrap {} of type {}".format(wrap, type(wrap)))
 
-    def get_neighbour_states(self, applyneighbourhood=True):
+    def get_neighbour_states(self, applyneighbourhood=False):
         """Return the 8 arrays of each neighbours current state"""
         grid = self.wrapping_grid
         if applyneighbourhood:
-            nhood_arr = self.neighbourhood.neighbourhood
+            nhood_arr = self.neighbourhood.neighbourhood # Sets the 3x3 grid to a combination of 0s and 1s depending on the nhood
         else:
-            nhood_arr = np.ones((3, 3))
+            nhood_arr = np.ones((5, 5)) # Assumes all neighbours
         # Return the NW N NE, W self E, SW S SE neighbourgrids
-        nw = nhood_arr[0, 0] * grid[0:-2, 0:-2]
-        n = nhood_arr[0, 1] * grid[0:-2, 1:-1]
-        ne = nhood_arr[0, 2] * grid[0:-2, 2:]
-        w = nhood_arr[1, 0] * grid[1:-1, 0:-2]
-        e = nhood_arr[1, 2] * grid[1:-1, 2:]
-        sw = nhood_arr[2, 0] * grid[2:, 0:-2]
-        s = nhood_arr[2, 1] * grid[2:, 1:-1]
-        se = nhood_arr[2, 2] * grid[2:, 2:]
-        return np.array([nw, n, ne, w, e, sw, s, se])
+        #The multiplication either returns 0 if not used, or the value if 1, meaning it is used.
+        nw = nhood_arr[1, 1] * grid[1:-3, 1:-3]
+        n = nhood_arr[1, 2] * grid[1:-3, 2:-2]
+        ne = nhood_arr[1, 3] * grid[1:-3, 3:-1]
+        w = nhood_arr[2, 1] * grid[2:-2, 1:-3]
+        e = nhood_arr[2, 3] * grid[2:-2, 3:-1]
+        sw = nhood_arr[3, 1] * grid[3:-1, 1:-3]
+        s = nhood_arr[3, 2] * grid[3:-1, 2:-2]
+        se = nhood_arr[3, 3] * grid[3:-1, 3:-1]
+
+        nn = nhood_arr[0,2] * grid[0:-4, 2:-2]
+        ee = nhood_arr[2,4] * grid[2:-2, 4:]
+        ss = nhood_arr[4,2] * grid[4:, 2:-2]
+        ww = nhood_arr[2,0] * grid[2:-2, :-4]
+
+        selfState = nhood_arr[2,2] * grid[2:-2, 2:-2]
+
+        #print(s.size)#40000
+        #print(ss.size)#0
+        #print(grid.size)
+        #print(grid[3:-1, 2:-2].shape)
+        #print(grid[3:1, 1:-1])
+
+        #Add wrapper layer
+        #Adjust indicies by 1
+
+
+        WIND = "S->N"
+        retArr = []
+        if(WIND == "N->S"):
+            retArr = np.array([nw, n, ne, w, e, sw, s, se, nn])
+        elif(WIND == "W->E"):
+            retArr = np.array([nw, n, ne, w, e, sw, s, se, ww])
+        elif(WIND == "S->N"):
+            retArr = np.array([nw, n, ne, w, e, sw, s, se, ss])
+        elif(WIND == "E->W"):
+            retArr = np.array([nw, n, ne, w, e, sw, s, se, ee])
+        elif(WIND == "None"):
+            retArr = np.array([nw, n, ne, w, e, sw, s, se, selfState])
+        return retArr
 
     def count_neighbours(self, neighbour_states):
         """
@@ -149,6 +180,7 @@ class Grid2D(Grid):
             # for each state in the CA
             countg = np.zeros(self.grid.shape)
             for g in neighbour_states:
+                #print(g.shape)
                 # for each neighbour array add the cells in the queried state
                 countg += (g == state) + 0
             # save the total counts for this state

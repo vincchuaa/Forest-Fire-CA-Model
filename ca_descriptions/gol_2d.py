@@ -12,7 +12,7 @@ sys.path.append(main_dir_loc + 'capyle/ca')
 sys.path.append(main_dir_loc + 'capyle/guicomponents')
 # ---
 
-from capyle.ca import Grid2D, Neighbourhood, CAConfig, randomise2d
+from capyle.ca import Grid2D2, Neighbourhood, CAConfig, randomise2d
 import capyle.utils as utils
 import numpy as np
 
@@ -30,11 +30,11 @@ def transition_func(grid, burnTimers, neighbourstates, neighbourcounts):
     #Chap burns for "several days" = 8 time
     #Forest burns for "one month" = 60 time
 
-    NW, N, NE, W, E, SW, S, SE = neighbourstates
+    NW, N, NE, W, E, SW, S, SE, wind = neighbourstates
 
     burningCan = (grid == 6) & (burning >= 1)
-    burningChap = (grid == 0) & (burning >= 2) | (grid == 0) & (N == 1)
-    burningFor = (grid == 5) & (burning >= 3) | (grid == 5) & (N == 1) # wind maybe???
+    burningChap = (grid == 0) & (burning >= 2) #| (grid == 0) & (W == 1)
+    burningFor = (grid == 5) & (burning >= 3) #| (grid == 5) & (W == 1) # wind maybe???
 
     burnTimers[burningCan] = 2
     burnTimers[burningChap] = 9
@@ -147,7 +147,7 @@ def main():
     config = setup(sys.argv[1:])
 
     # Create grid object
-    grid = Grid2D(config, transition_func)
+    grid = Grid2D2(config, transition_func)
 
     # Run the CA, save grid state every generation to timeline
     timeline = grid.run()
